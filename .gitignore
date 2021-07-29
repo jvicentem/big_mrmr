@@ -1,2 +1,7 @@
 dataset
 BACKLOG.txt
+mrmr/__pycache__/__init__.cpython-36.pyc
+mrmr/__pycache__/expected_mutual_info_fast.cpython-36.pyc
+mrmr/__pycache__/mrmr.cpython-36.pyc
+_expected_mutual_info_fast.c
+test_exp_mi.py
