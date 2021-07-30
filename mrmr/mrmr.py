@@ -1,10 +1,8 @@
 from collections import deque
 from datetime import datetime
-from functools import lru_cache
 import itertools
 import math
 import statistics
-from sys import maxsize
 import time
 
 from joblib import Parallel, delayed
@@ -13,14 +11,11 @@ from tqdm import tqdm
 import pandas as pd
 from pyspark.sql import functions as f
 from pyspark.sql.window import Window
-from scipy.sparse import csr_matrix
 from scipy.stats import entropy as sc_entropy
-from sklearn.metrics import confusion_matrix
 from sklearn.metrics.cluster._expected_mutual_info_fast import expected_mutual_information   
 from sklearn.metrics.cluster._supervised import _generalized_average
 
-from _expected_mutual_info_fast import expected_mutual_information, prueba
-from expected_mutual_info_fast import expected_mutual_information_py
+from _expected_mutual_info_fast import expected_mutual_information
 
 
 class MRMR:
@@ -452,7 +447,6 @@ class MRMR:
 
             return pd.DataFrame(self.mrmr_best_partial_score).sort_values(by=1, ascending=False).iloc[:, :self.top_best_solutions], None
 
-    @lru_cache(maxsize=1024)
     def adjusted_mutual_info_score(self, a, b):
         comb = self.comb(a, b)
 
