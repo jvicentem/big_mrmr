@@ -6,3 +6,5 @@ mrmr/__pycache__/mrmr.cpython-36.pyc
 _expected_mutual_info_fast.c
 expected_mutual_info_fast.py
 test_exp_mi.py
+mrmr/expected_mutual_info_fast_or.py
+mrmr/__pycache__/expected_mutual_info_fast_or.cpython-36.pyc

@@ -12,7 +12,6 @@ import pandas as pd
 from pyspark.sql import functions as f
 from pyspark.sql.window import Window
 from scipy.stats import entropy as sc_entropy
-from sklearn.metrics.cluster._expected_mutual_info_fast import expected_mutual_information   
 from sklearn.metrics.cluster._supervised import _generalized_average
 
 from _expected_mutual_info_fast import expected_mutual_information
@@ -85,7 +84,7 @@ class MRMR:
                 return self.ent_cache[a]
             else:
                 self.label_count_cache[a] = self.count_cats([a])                            
-                return sc_entropy(self.label_count_cache[a]['ratio'], base=2)
+                return sc_entropy(self.label_count_cache[a]['ratio'])
         else:
             comb = self.comb(features[0], features[1])
             
@@ -93,7 +92,7 @@ class MRMR:
                 return self.ent_cache[comb]  
             else:                    
                 self.label_count_cache[comb] = self.count_cats(features)                
-                return sc_entropy(self.label_count_cache[comb]['ratio'], base=2)
+                return sc_entropy(self.label_count_cache[comb]['ratio'])
     
     def mi(self, a, b):
         self.ent_cache[a] = self.ent([a])
