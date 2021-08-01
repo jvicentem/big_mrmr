@@ -79,6 +79,8 @@ class TestAdjustedMutualInfo(unittest.TestCase):
           
         result = (mrmr_obj.mi('a', 'b') - emi) / denominator      
 
+        spark.stop()
+
         self.assertTrue(np.isclose(sk_result, result, atol=1e-10))
 
 if __name__ == '__main__':
