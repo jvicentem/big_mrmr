@@ -8,3 +8,9 @@ expected_mutual_info_fast.py
 test_exp_mi.py
 mrmr/expected_mutual_info_fast_or.py
 mrmr/__pycache__/expected_mutual_info_fast_or.cpython-36.pyc
+mrmr/modes/__pycache__/optimal_k.cpython-36.pyc
+mrmr/modes/__pycache__/optimal_c.cpython-36.pyc
+mrmr/modes/__pycache__/abstract_mode.cpython-36.pyc
+mrmr/modes/__pycache__/__init__.cpython-36.pyc
+mrmr/cython_modules/__pycache__/__init__.cpython-36.pyc
+mrmr/cython_modules/_expected_mutual_info_fast.pyx

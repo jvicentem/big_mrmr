@@ -7,11 +7,11 @@ import pandas as pd
 
 sys.path.append('/home/jose/big_mrmr/mrmr')
 
-os.chdir('./mrmr')
+os.chdir('./mrmr/cython_modules')
 from Cython.Build import cythonize
 os.environ['PYDEVD_WARN_EVALUATION_TIMEOUT'] = '30'
 cythonize('_expected_mutual_info_fast.pyx')
-os.chdir('..')
+os.chdir('../..')
 
 import pyximport; pyximport.install()
 
@@ -41,11 +41,13 @@ spark = (SparkSession.builder
 
 sc = spark.sparkContext
 
+sc.setCheckpointDir('/home/jose/Desktop/checkpoints')
+
 sc.setLocalProperty("spark.scheduler.pool", "mrmr")
 
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType, DoubleType
 
-# df = spark.read.csv('/home/jose/mrmr/dataset/used_cars_data.csv', 
+# df = spark.read.csv('/home/jose/big_mrmr/dataset/used_cars_data.csv', 
 #                     header = True, 
 #                     mode = 'DROPMALFORMED'
 #                     )
@@ -92,26 +94,27 @@ from pyspark.sql.types import StructType, StructField, StringType, IntegerType, 
 #         .withColumn('width', f.when(f.col('width').contains('in'),
 #                                            f.regexp_replace('width', 'in', '')
 #                                            ).cast('float')
-#                     )                                                                                                                                            
+#                     )
+#         .withColumn('city_fuel_economy', f.col('city_fuel_economy').cast('float'))
+#         .withColumn('daysonmarket', f.col('daysonmarket').cast('float'))
+#         .withColumn('engine_displacement', f.col('engine_displacement').cast('float'))
+#         .withColumn('highway_fuel_economy', f.col('highway_fuel_economy').cast('float'))
+#         .withColumn('horsepower', f.col('horsepower').cast('float'))
+#         .withColumn('mileage', f.col('mileage').cast('float'))
+#         .withColumn('owner_count', f.col('owner_count').cast('float'))
+#         .withColumn('savings_amount', f.col('savings_amount').cast('float'))
+#         .withColumn('maximum_seating', f.when(f.col('maximum_seating').contains('seats'),
+#                                               f.regexp_replace('maximum_seating', 'seats', '')
+#                                              ).cast('float')
+#                    )        
+#         .withColumn('price', f.col('price').cast('float'))                                                                                                                                                                 
 #         )
 
-# df.write.parquet('/home/jose/mrmr/dataset/used_cars_data_custom', mode='overwrite')
+# df.write.parquet('/home/jose/big_mrmr/dataset/used_cars_data_custom', mode='overwrite')
+
 df = (spark
        .read
-       .parquet('/home/jose/big_mrmr/dataset/used_cars_data_custom')
-       .withColumn('city_fuel_economy', f.col('city_fuel_economy').cast('float'))
-       .withColumn('daysonmarket', f.col('daysonmarket').cast('float'))
-       .withColumn('engine_displacement', f.col('engine_displacement').cast('float'))
-       .withColumn('highway_fuel_economy', f.col('highway_fuel_economy').cast('float'))
-       .withColumn('horsepower', f.col('horsepower').cast('float'))
-       .withColumn('mileage', f.col('mileage').cast('float'))
-       .withColumn('owner_count', f.col('owner_count').cast('float'))
-       .withColumn('savings_amount', f.col('savings_amount').cast('float'))
-       .withColumn('maximum_seating', f.when(f.col('maximum_seating').contains('seats'),
-                                             f.regexp_replace('maximum_seating', 'seats', '')
-                                             ).cast('float')
-                   )        
-       .withColumn('price', f.col('price').cast('float'))            
+       .parquet('/home/jose/big_mrmr/dataset/used_cars_data_custom')           
       )
 
 mrmr_obj = MRMR(df.limit(1000000), 
@@ -125,7 +128,8 @@ mrmr_obj = MRMR(df.limit(1000000),
                         'body_type', 'engine_cylinders', 'fleet', 'frame_damaged',
                         'franchise_dealer', 'fuel_type', 'has_accidents',
                         'isCab', 'is_new', 'maximum_seating', 'salvage',
-                        'wheel_system', 'wheel_system_display', 'price'
+                        'wheel_system', 'wheel_system_display', 
+                        'price'
                         ],
                 cont_vars=['city_fuel_economy', 'daysonmarket', 'engine_displacement',
                            'highway_fuel_economy', 'horsepower', 'mileage', 'owner_count',
@@ -137,10 +141,11 @@ mrmr_obj = MRMR(df.limit(1000000),
                 optimal_k=True, 
                 top_best_solutions=4, 
                 must_included_vars=[],
-                max_mins=120)
+                max_mins=120,
+                cache_or_checkp=None)
     
 start_time = time.time()
-mrmr, debug_mrmr = mrmr_obj.mrmr()
+mrmr = mrmr_obj.mrmr()
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)

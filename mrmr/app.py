@@ -7,11 +7,11 @@ import pandas as pd
 
 sys.path.append('/home/jose/big_mrmr/mrmr')
 
-os.chdir('./mrmr')
+os.chdir('./mrmr/cython_modules')
 from Cython.Build import cythonize
 os.environ['PYDEVD_WARN_EVALUATION_TIMEOUT'] = '30'
 cythonize('_expected_mutual_info_fast.pyx')
-os.chdir('..')
+os.chdir('../..')
 
 import pyximport; pyximport.install()
 
