@@ -19,6 +19,8 @@ class OptimalC(AbstractMode):
         self.mrmr_best_partial_score = [-9999] * self.k  
 
     def calculate_optimal_vars(self):
+        self.remove_high_card_vars()
+        
         self.start_time = time.time()
 
         def _iterate(a, cols):

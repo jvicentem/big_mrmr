@@ -1,4 +1,5 @@
 from datetime import datetime
+import functools
 import itertools
 import math
 import time
@@ -23,12 +24,12 @@ class OptimalK(AbstractMode):
         self.mrmr_best_partial_score = [('', -9999)] * top_best_solutions    
 
     def calculate_optimal_vars(self):
+        self.remove_high_card_vars()
+        
         self.start_time = time.time()
 
         # 0. Take into account that user can configurate variables that must be in the solution.            
-        # 1. Get all combinations of k features    
-
-        self._remove_high_card_vars()
+        # 1. Get all combinations of k features            
 
         print('Calculating target adj mis...')
         print(datetime.now())                   
@@ -46,8 +47,11 @@ class OptimalK(AbstractMode):
 
         def _iterate_sols(c, first_it):
             if (time.time() - self.start_time) / 60 <= self.max_mins:
-                in_cancelled_sols = any([set(c[0:i]) == set(c[0:i]).intersection(cs) for cs in self.cancelled_partial_solutions for i in range(2, self.k)])
+                in_cancelled_sols = any([set(c[0:i]) == set(cs) for cs in self.cancelled_partial_solutions for i in range(2, self.k)])
                 must_vars_in_c = not self.must_included_vars or all(col in c for col in self.must_included_vars)
+
+                if in_cancelled_sols:
+                    print(c, self.cancelled_partial_solutions, '\n ***************')                    
 
                 if not in_cancelled_sols and must_vars_in_c:
                     partial_mrmr = []
@@ -67,8 +71,12 @@ class OptimalK(AbstractMode):
                             if worth_continue:
                                 partial_mrmr.append(col_mrmr) 
                             else:
-                                self.cancelled_partial_solutions.append(set(c[0:(ix+1)]))
-                                break
+                                if len(c[0:(ix+1)]) < self.k:
+                                    self.cancelled_partial_solutions.append(set(c[0:(ix+1)]))
+
+                                    print(len(self.cancelled_partial_solutions), '\n =======')
+
+                                    break
                         else:
                             partial_mrmr.append(col_mrmr) 
 
@@ -80,13 +88,13 @@ class OptimalK(AbstractMode):
         print('Calculating mrmr...')
 
         n_starting_coms = (math.factorial(len(target_mis)) / 
-                            (math.factorial((len(target_mis) - self.k)) * math.factorial(self.k))
-                            )
+                           (math.factorial((len(target_mis) - self.k)) * math.factorial(self.k))
+                          )
 
         _ = _iterate_sols(next(combs), True)
 
         tqdm._instances.clear()
-        _ = Parallel(n_jobs=-1, require='sharedmem')(delayed(_iterate_sols)(c, False) for c in tqdm(combs, total=n_starting_coms))                   
+        _ = Parallel(n_jobs=1, require='sharedmem')(delayed(_iterate_sols)(c, False) for c in tqdm(combs, total=n_starting_coms))                   
 
         # 2.2.1. When the mean MRMR of some of the variables cannot reach the mean MRMR of other
         # solution, we stop iterating through the variables of that solution, and that partial
@@ -111,20 +119,9 @@ class OptimalK(AbstractMode):
         else:
             return (col, [None])
 
+    @functools.cache
     def _adj_mrmr_cache(self, a, b):
         return self.adjusted_mutual_info_score(a, b)    
-
-    def _remove_high_card_vars(self, thresh = 0.5):        
-        for k in self.df.columns:
-            if k != self.target:
-                self.label_count_cache[k] = self.count_cats([k], return_counts=True)
-
-                n_unique_values = len(self.label_count_cache[k])
-
-                if n_unique_values/self.df_count >= thresh:                    
-                    del self.label_count_cache[k]
-                    self.df = self.df.drop(k)
-                    print(f'Variable "{k}" removed because high cardinality (ratio > {thresh} of whole dataset size). If it\'s numerical, consider including it in the cont_vars parameter or remove it.')                    
 
     def adjusted_mutual_info_score(self, a, b):
         comb = self.comb(a, b)
@@ -132,11 +129,6 @@ class OptimalK(AbstractMode):
         if comb in self.ami_cache:
             return self.ami_cache[comb]
         else:           
-            # label_count = self.count_cats([a, b], return_counts=True)
-            
-            # classes = label_count[a].unique()
-
-            # clusters = label_count[b].unique()
             self.label_count_cache[comb] = self.count_cats([a, b], return_counts=True)
             
             classes = self.label_count_cache[comb][a].unique()
@@ -148,20 +140,11 @@ class OptimalK(AbstractMode):
             if (classes.shape[0] == clusters.shape[0] == 1 or classes.shape[0] == clusters.shape[0] == 0):
                 return 1.0        
 
-            # mi = self.mi(a, b)        
-
-            # aux_count_a = label_count[[a]].copy()
-            # aux_count_a['aux'] = 1
-
-            # aux_count_b = label_count[[b]].copy()
-            # aux_count_b['aux'] = 1    
             self.mi_cache[comb] = self.mi(a, b)        
 
-            aux_count_a = self.label_count_cache[comb][[a, 'count']]#.copy()
-            # aux_count_a['aux'] = 1
+            aux_count_a = self.label_count_cache[comb][[a, 'count']]
 
-            aux_count_b = self.label_count_cache[comb][[b, 'count']]#.copy()
-            # aux_count_b['aux'] = 1            
+            aux_count_b = self.label_count_cache[comb][[b, 'count']]    
                         
             emi = expected_mutual_information(aux_count_a.groupby(a).sum()['count'].values.astype('int32'), 
                                               aux_count_b.groupby(b).sum()['count'].values.astype('int32'), 
@@ -170,16 +153,6 @@ class OptimalK(AbstractMode):
                                               len(clusters)
                                               )
 
-            # emi_py = expected_mutual_information_py(aux_count_a.groupby(a).count()['aux'].values.astype('int32'), 
-            #                                         aux_count_b.groupby(b).count()['aux'].values.astype('int32'), 
-            #                                         self.df_count,
-            #                                         len(classes), 
-            #                                         len(clusters)
-            #                                         )
-
-            # ent_a = self.ent([a])
-            # ent_b = self.ent([b])
-            # h_true, h_pred = ent_a, ent_b
             self.ent_cache[a] = self.ent([a])
             self.ent_cache[b] = self.ent([b])
             h_true, h_pred = self.ent_cache[a], self.ent_cache[b]            
@@ -196,5 +169,5 @@ class OptimalK(AbstractMode):
                 denominator = min(denominator, -np.finfo('float64').eps)
             else:
                 denominator = max(denominator, np.finfo('float64').eps)
-            # return (mi - emi) / denominator    
+            
             return (self.mi_cache[comb] - emi) / denominator    

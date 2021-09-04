@@ -25,17 +25,17 @@ class MRMR:
         self.top_best_solutions = top_best_solutions
         self.must_included_vars = must_included_vars
                 
-        self.max_mins = max_mins                
+        self.max_mins = max_mins if max_mins is not None else 999999                
 
         self._convert_to_categorical(cont_vars)             
                 
         if cache_or_checkp is not None:
-            if 'cache' in cache_or_checkp:
+            if cache_or_checkp in 'cache':
                 self.df = self.df.cache()
-            elif 'checkpoint' in cache_or_checkp:
+            elif cache_or_checkp in 'checkpoint':
                 self.df = self.df.checkpoint()
 
-        self.df_count = self.df.count()        
+        self.df_count = self.df.count()
 
     def mrmr(self):               
         print('MRMR calculation starting...')

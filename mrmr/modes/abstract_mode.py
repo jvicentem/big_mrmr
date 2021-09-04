@@ -109,3 +109,15 @@ class AbstractMode:
         ratio_pdf['ratio'] = ratio_pdf['ratio'].astype('float32') 
 
         return ratio_pdf    
+
+    def remove_high_card_vars(self, thresh = 0.5):        
+        for k in self.df.columns:
+            if k != self.target:
+                self.label_count_cache[k] = self.count_cats([k], return_counts=True)
+
+                n_unique_values = len(self.label_count_cache[k])
+
+                if n_unique_values/self.df_count >= thresh:                    
+                    del self.label_count_cache[k]
+                    self.df = self.df.drop(k)
+                    print(f'Variable "{k}" removed because high cardinality (ratio > {thresh} of whole dataset size). If it\'s numerical, consider including it in the cont_vars parameter or remove it.')                    
