@@ -1,7 +1,11 @@
 from abc import abstractmethod
+import logging
 
 from pyspark.sql import functions as f
 from scipy.stats import entropy as sc_entropy
+
+logging.basicConfig(level=logging.INFO)
+
 
 class AbstractMode:
     def __init__(self, df, replace_na, target, k, top_best_solutions, must_included_vars, max_mins, df_count):

@@ -10,7 +10,7 @@ from modes.optimal_k import OptimalK
 class MRMR:
     def __init__(self, df, target, k=10, subset=[], cont_vars=[], replace_na=False, 
                  optimal_k=False, top_best_solutions=5, must_included_vars=[], 
-                 max_mins=10, cache_or_checkp=None):
+                 max_mins=10, cache_or_checkp=None, seed=16121993):
         
         self.subset = df.columns if not subset else subset 
 
@@ -28,6 +28,8 @@ class MRMR:
         self.max_mins = max_mins if max_mins is not None else 999999                
 
         self._convert_to_categorical(cont_vars)             
+
+        self.seed = seed
                 
         if cache_or_checkp is not None:
             if cache_or_checkp in 'cache':
@@ -49,7 +51,8 @@ class MRMR:
                            self.top_best_solutions, 
                            self.must_included_vars,
                            self.max_mins,
-                           self.df_count)           
+                           self.df_count,
+                           self.seed)           
         else: 
             opt = OptimalC(self.df, 
                            self.replace_na, 

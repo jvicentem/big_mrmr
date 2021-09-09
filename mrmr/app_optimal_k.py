@@ -117,9 +117,9 @@ df = (spark
        .parquet('/home/jose/big_mrmr/dataset/used_cars_data_custom')           
       )
 
-mrmr_obj = MRMR(df.limit(50000),#.sample(0.25, seed=16121993), 
+mrmr_obj = MRMR(df.sample(0.25, seed=16121993), 
                 target='price', 
-                k=5,#15,
+                k=15,
                 subset=['city_fuel_economy', 'daysonmarket', 'engine_displacement',
                         'highway_fuel_economy', 'horsepower', 'mileage', 'owner_count',
                         'savings_amount', 'seller_rating', 'back_legroom',
@@ -139,9 +139,9 @@ mrmr_obj = MRMR(df.limit(50000),#.sample(0.25, seed=16121993),
                            ], 
                 replace_na=True,
                 optimal_k=True, 
-                top_best_solutions=4,#10,
+                top_best_solutions=10,
                 must_included_vars=[],
-                max_mins=60*4,
+                max_mins=60*1.25,
                 cache_or_checkp=None)
     
 start_time = time.time()

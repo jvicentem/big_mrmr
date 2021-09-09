@@ -154,5 +154,16 @@ pd.set_option('display.max_colwidth', None)
 print('~~~~~~~~~~~~~~~~ END ~~~~~~~~~~~~~~~')
 print('--- %s minutes ---' % ((time.time() - start_time) / 60))
 print(datetime.now())
-# print(mrmr.to_string())
+
 print(mrmr)
+
+# --- 36.27881904840469 minutes ---
+# 2021-09-08 10:05:33.919238
+#    mileage  seller_rating  savings_amount  back_legroom  daysonmarket  \
+# 0   0.2694       0.251829        0.203472      0.165368      0.109365   
+
+#    highway_fuel_economy  horsepower     width    height  front_legroom  \
+# 0              0.077853    0.062767  0.051522  0.019123       0.015843   
+
+#    owner_count  maximum_seating   length  wheelbase  fuel_tank_volume  
+# 0     0.011512        -0.003102 -0.00699   -0.01024         -0.015935 
