@@ -77,6 +77,8 @@ class OptimalK(AbstractMode):
                                 partial_col_mrmr.append(self._adj_mi_cache(col, x))
                             else:             
                                 if not first_it:
+                                    # Note: The best adjusted MI is not necessarily 0, on average is 0, so it can be negative.
+                                    # As a compromise decision, 0 is used.
                                     partial_x_mean_mi = statistics.mean(partial_col_mrmr + ([0.0] * (self.k-1 - len(partial_col_mrmr))))
 
                                     partial_val_col_mrmr = self._adj_mi_cache(col, self.target) - partial_x_mean_mi
