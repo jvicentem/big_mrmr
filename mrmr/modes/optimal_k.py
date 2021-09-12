@@ -36,7 +36,7 @@ class OptimalK(AbstractMode):
 
         logger = logging.getLogger('optimal_k')
 
-        logger.info('Calculating target adj mis...')
+        logger.info('Calculating target adj MIs...')
         logger.info(datetime.now())                   
 
         target_mis = Parallel(n_jobs=-1, require='sharedmem')(delayed(self._calc_target_adj_mi)(col) for col in tqdm(self.df.columns))                                

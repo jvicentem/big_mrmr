@@ -42,7 +42,7 @@ class OptimalC(AbstractMode):
                 # if in the best possible scenario the mrmr score is better than the score in kth position...
                 possible_good_mi = target_mi - statistics.mean([0] * (len(self.df.columns)-2))
 
-                if possible_good_mi >= self.mrmr_best_partial_score[self.k - 1]:           
+                if possible_good_mi >= self.mrmr_best_partial_score[self.k - 1] or a in self.must_included_vars:           
                     worth_continue = True
 
                     for b in cols:
@@ -66,21 +66,18 @@ class OptimalC(AbstractMode):
                             possible_good_mi = target_mi - statistics.mean(aux_x_mis)
                             worth_continue = possible_good_mi >= self.mrmr_best_partial_score[self.k - 1]
 
-                            if not worth_continue:       
+                            if not worth_continue and a not in self.must_included_vars:       
                                 self.cols_processed.append(a)    
-    
-                            if (time.time() - self.start_time) / 60 > self.max_mins:
-                                self.cols_processed.append(a)
-                                self.mrmr_scores[a] = None 
-                                return None
 
-                    if worth_continue:
+                    if worth_continue or a in self.must_included_vars:
                         final_mi = target_mi - statistics.mean(x_mis)
 
-                        if final_mi >= self.mrmr_best_partial_score[self.k - 1]:
+                        if final_mi >= self.mrmr_best_partial_score[self.k - 1] or a in self.must_included_vars:
                             self.mrmr_best_partial_score[self.k - 1] = final_mi
                             self.mrmr_best_partial_score.sort(reverse=True)
+
                             self.mrmr_best_partial_score = self.mrmr_best_partial_score[:self.k]
+
                             self.mrmr_scores[a] = [final_mi]
                     
                         self.cols_processed.append(a)
@@ -99,7 +96,7 @@ class OptimalC(AbstractMode):
             else:
                 return (col, [None])
         
-        logger.info('Calculating target mis...')
+        logger.info('Calculating target MIs...')
         logger.info(datetime.now())
     
         self.ent_cache[self.target] = self.ent([self.target])
@@ -124,8 +121,16 @@ class OptimalC(AbstractMode):
                                                                     )
                                                     )
 
-        return (pd.DataFrame(self.mrmr_scores)
-                  .sort_values(axis=1, by=0, ascending=False)
+        result_df = pd.DataFrame(self.mrmr_scores).sort_values(axis=1, by=0, ascending=False)
+        df_cols = list(result_df.columns)
+
+        for mv in self.must_included_vars:
+            position = df_cols.index(mv) + 1
+
+            if position > self.k:
+                self.k = position
+
+        return (result_df
                   .iloc[:, :self.k]
                   .rename(columns={0: 'features_set', 1: 'mrmr'})
                   )
