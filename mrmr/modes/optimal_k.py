@@ -4,7 +4,6 @@ import logging
 import math
 import random
 import statistics
-import sys
 import time
 
 from joblib import Parallel, delayed
@@ -28,6 +27,8 @@ class OptimalK(AbstractMode):
 
     def calculate_optimal_vars(self):
         self.remove_high_card_vars()
+
+        random.seed(self.seed)
         
         self.start_time = time.time()
 
@@ -36,25 +37,23 @@ class OptimalK(AbstractMode):
 
         logger = logging.getLogger('optimal_k')
 
-        logger.info('Calculating target adj MIs...')
+        logger.info('Calculating target adj. MIs...')
         logger.info(datetime.now())                   
 
         target_mis = Parallel(n_jobs=-1, require='sharedmem')(delayed(self._calc_target_adj_mi)(col) for col in tqdm(self.df.columns))                                
 
         target_mis = pd.DataFrame(dict(target_mis)).sort_values(axis=1, by=0, ascending=False)          
         target_mis = list(target_mis.columns)     
-        target_mis.remove(self.target)
+        target_mis.remove(self.target)    
 
-        n_starting_coms = (math.factorial(len(target_mis)) / 
-                           (math.factorial((len(target_mis) - self.k)) * math.factorial(self.k))
-                          )        
-        
-        if self.max_mins:
-            random.seed(self.seed)
-            sample = random.sample
-            combs = target_mis[:self.k]
+        if not self.must_included_vars:          
+            if self.max_mins:
+                combs = target_mis[:self.k]
+            else:
+                combs = itertools.combinations(target_mis, self.k)
         else:
-            combs = itertools.combinations(target_mis, self.k)
+            combs = self.must_included_vars + list(set(target_mis).difference(set(self.must_included_vars)))
+            combs = combs[:self.k]               
 
         # 2. Iterate through them
         # 2.2. Inside each solution, calculate the MRMR for each variable.                    
@@ -89,7 +88,7 @@ class OptimalK(AbstractMode):
 
                                     worth_continue = best_partial_possible_mrmr > self.mrmr_best_partial_score[self.top_best_solutions - 1][1]
 
-                                    if not worth_continue:
+                                    if not worth_continue and col not in self.must_included_vars:
                                         if len(c[0:(ix+1)]) < self.k:
                                             self.cancelled_partial_solutions.append(set(c[0:(ix+1)]))
                                         break       
@@ -99,14 +98,14 @@ class OptimalK(AbstractMode):
                                     partial_col_mrmr.append(self._adj_mi_cache(col, x))                              
                     
                     if not first_it:                              
-                        if worth_continue:
+                        if worth_continue or col in self.must_included_vars:
                             col_mrmr = self._adj_mi_cache(col, self.target) - statistics.mean(partial_col_mrmr)
 
                             best_possible_mrmr = partial_mrmr + [col_mrmr]
                             best_possible_mrmr = statistics.mean( best_possible_mrmr + ([1.0] * (self.k - len(best_possible_mrmr))) )
                             worth_continue = best_possible_mrmr > self.mrmr_best_partial_score[self.top_best_solutions - 1][1]
 
-                            if worth_continue:
+                            if worth_continue or col in self.must_included_vars:
                                 partial_mrmr.append(col_mrmr)
                             else:
                                 if len(c[0:(ix+1)]) < self.k:
@@ -118,25 +117,43 @@ class OptimalK(AbstractMode):
                         col_mrmr = self._adj_mi_cache(col, self.target) - statistics.mean(partial_col_mrmr)
                         partial_mrmr.append(col_mrmr) 
 
-                if worth_continue:
+                if worth_continue or col in self.must_included_vars:
                     self.mrmr_best_partial_score.append( (c, statistics.mean(partial_mrmr)) )
                     self.mrmr_best_partial_score = sorted(self.mrmr_best_partial_score, key=lambda x: x[1], reverse=True)
                     self.mrmr_best_partial_score = self.mrmr_best_partial_score[0:(self.top_best_solutions)]                        
         
         logger.info('Calculating mrmr...')
         logger.info(datetime.now())
-
-        if self.max_mins:
-            _ = _iterate_sols(combs, True)
-        else:            
-            _ = _iterate_sols(next(combs), True)
+        
+        _ = _iterate_sols(combs, True)
  
         tqdm._instances.clear()        
 
-        if self.max_mins:
-            _ = Parallel(n_jobs=-1, require='sharedmem')(delayed(_iterate_sols)(c, False) for c in tqdm( (sample(target_mis, self.k) for x in range(0, sys.maxsize) if (time.time() - self.start_time) / 60 <= self.max_mins)  ))           
+        if not self.must_included_vars:
+            if self.max_mins:
+                _ = Parallel(n_jobs=-1, require='sharedmem')(delayed(_iterate_sols)(c, False) for c in tqdm(self._get_sample(target_mis)))                   
+            else:
+                combs = itertools.combinations(target_mis, self.k)
+
+                n_starting_coms = (math.factorial(len(target_mis)) / 
+                                   (math.factorial((len(target_mis) - self.k)) * math.factorial(self.k))
+                                  )                    
+
+                _ = Parallel(n_jobs=-1, require='sharedmem')(delayed(_iterate_sols)(c, False) for c in tqdm(self._get_comb(combs), total=n_starting_coms))                   
         else:
-            _ = Parallel(n_jobs=-1, require='sharedmem')(delayed(_iterate_sols)(c, False) for c in tqdm((x for x in combs if (time.time() - self.start_time) / 60 <= self.max_mins), total=n_starting_coms))                   
+            comb_cols = list(set(target_mis).difference(set(self.must_included_vars)))
+            new_k = self.k - len(self.must_included_vars)
+
+            if new_k < len(comb_cols):
+                n_starting_coms = (math.factorial(len(comb_cols)) / 
+                                    (math.factorial((len(comb_cols) - new_k)) * math.factorial(new_k))
+                                    )     
+
+                combs = itertools.combinations(comb_cols, new_k)
+
+                _ = Parallel(n_jobs=-1, require='sharedmem')(delayed(_iterate_sols)(tuple(self.must_included_vars) + c, False) for c in tqdm(self._get_comb(combs), total=n_starting_coms))                                   
+            else:
+                _ = _iterate_sols(tuple(self.must_included_vars) + tuple(comb_cols))                                             
 
         # 2.2.1. When the mean MRMR of some of the variables cannot reach the mean MRMR of other
         # solution, we stop iterating through the variables of that solution, and that partial
@@ -217,3 +234,11 @@ class OptimalK(AbstractMode):
                 denominator = max(denominator, np.finfo('float64').eps)
             
             return (self.mi_cache[comb] - emi) / denominator    
+
+    def _get_comb(self, combs):
+        while (time.time() - self.start_time) / 60 <= self.max_mins:
+            yield next(combs)
+
+    def _get_sample(self, target_mis):
+        while (time.time() - self.start_time) / 60 <= self.max_mins:
+            yield random.sample(target_mis, self.k)           

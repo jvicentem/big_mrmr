@@ -10,9 +10,15 @@ from modes.optimal_k import OptimalK
 class MRMR:
     def __init__(self, df, target, k=10, subset=[], cont_vars=[], replace_na=False, 
                  optimal_k=False, top_best_solutions=5, must_included_vars=[], 
-                 max_mins=10, cache_or_checkp=None, seed=16121993):
-        
-        self.subset = df.columns if not subset else subset 
+                 max_mins=10, cache_or_checkp=None, seed=16121993):    
+
+        self.subset = df.columns if not subset else subset         
+
+        if len(must_included_vars) > len(subset):
+            raise Exception('More must included vars than columns selected (len(must_included_vars) > len(subset)).')      
+
+        if len(must_included_vars) > k:
+            raise Exception('More must included vars than columns to be chosen (len(must_included_vars) > k).')                 
 
         if target not in self.subset:
             self.subset = self.subset + [target]
@@ -23,7 +29,7 @@ class MRMR:
         self.k = k        
         self.optimal_k = optimal_k
         self.top_best_solutions = top_best_solutions
-        self.must_included_vars = must_included_vars
+        self.must_included_vars = must_included_vars        
                 
         self.max_mins = max_mins if max_mins is not None else 999999                
 
