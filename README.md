@@ -31,7 +31,7 @@ You can configure the MRMR calculation via the instantiation parameters of the `
 
 `subset` (Default value `[]`): `List[string]` : List of column names to use. These columns must be included in the input dataframe. The default value is an empty list and it will use all the columns.
 
-`cont_vars` (Default value `[]`): `List[string]` : List of columns that are continuous variables. The columns in this list will have their values replaced by their decile, converting them in discrete variables. These columns must be included in the input dataframe.
+`cont_vars` (Default value `[]`): `List[string]` : List of columns that are continuous variables. The columns in this list will have their values replaced by their decile, converting them in discrete variables. These columns must be included in the input dataframe. Consider this as an easy discretization, maybe you want to do your own discretization based on the meaning of your data.
 
 `replace_na` (Default value `False`): `bool` : True if you want to have the NAs/Null/None values replaced or not. Numerical variables will have the value -1 when Null, and string variables will have the value "Null" when Null.
 
@@ -45,7 +45,7 @@ This means, that when `optimal_k` is True the `mrmr()` method will return a Data
 
 `must_included_vars` (Default value `[]`): `List[string]` : List of names of columns that must be included in the solutions. These columns must be included in the input dataframe and in the `subset` parameter, if used.
 
-`max_mins` (Default value `None`): `float` : If different than `None`, the calculation will end after that number of minutes. The countdown will start at the beginning of the heaviest part of the code: the calculation of the optimal columns according to MRMR.
+`max_mins` (Default value `None`): `float` : If different than `None`, the calculation will end after that number of minutes. The countdown will start at the beginning of the heaviest part of the code: the calculation of the optimal columns according to MRMR. It is advisable to set a value to this parameter, because depending on the number of columns of your DataFrame and on the value of `k`, it may take a very long time to explore all the possible solutions.
 
 `cache_or_checkp` (Default value `None`): `string` : If different than `None`, it will cache the Spark DataFrame when its value equals `cache` and it will checkpoint the Spark DataFrame when its value equals `checkpoint`. Take into account that if you want to checkpoint the Spark DataFrame you will need to set a checkpoint directory (Google this or check the examples to see how).
 
@@ -81,7 +81,5 @@ Vinh, Epps, and Bailey, (2010). Information Theoretic Measures for Clusterings C
 
 https://jmlr.csail.mit.edu/papers/volume11/vinh10a/vinh10a.pdf
 
-- What does corrected for chance mean: 
-
-https://stats.stackexchange.com/questions/334045/whats-the-meaning-of-corrected-for-chance
+- What does corrected for chance mean: https://stats.stackexchange.com/questions/334045/whats-the-meaning-of-corrected-for-chance
 
