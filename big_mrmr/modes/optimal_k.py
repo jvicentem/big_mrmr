@@ -12,8 +12,8 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics.cluster._supervised import _generalized_average
 
-from cython_modules._expected_mutual_info_fast import expected_mutual_information
-from modes.abstract_mode import AbstractMode
+from big_mrmr.cython_modules._expected_mutual_info_fast import expected_mutual_information
+from big_mrmr.modes.abstract_mode import AbstractMode
 
 class OptimalK(AbstractMode):    
     def __init__(self, df, replace_na, target, k, top_best_solutions, must_included_vars, max_mins, df_count, seed):

@@ -23,15 +23,15 @@ os.chdir('..')
 
 import pyximport; pyximport.install()
 
-from mrmr.mrmr import MRMR
-from _expected_mutual_info_fast import expected_mutual_information
+from big_mrmr.mrmr import MRMR
+from big_mrmr.cython_modules._expected_mutual_info_fast import expected_mutual_information
 
 
 class TestAdjustedMutualInfo(unittest.TestCase):
     def test_adj_mutual_info(self):       
-        pdf = pd.DataFrame({'a': ['a', 'b', 'c', 'c'#, 'a', 'b'
+        pdf = pd.DataFrame({'a': ['a', 'b', 'c', 'c'
                                  ], 
-                            'b': ['a', 'b', 'c', 'b'#, 'a', 'b'
+                            'b': ['a', 'b', 'c', 'b'
                                  ]})
 
         sk_result = adjusted_mutual_info_score(pdf['a'], pdf['b'])

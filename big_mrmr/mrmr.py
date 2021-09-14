@@ -1,10 +1,10 @@
 from datetime import datetime
-from modes.optimal_c import OptimalC
 
 from pyspark.sql import functions as f
 from pyspark.sql.window import Window
 
-from modes.optimal_k import OptimalK
+from big_mrmr.modes.optimal_c import OptimalC
+from big_mrmr.modes.optimal_k import OptimalK
 
 
 class MRMR:

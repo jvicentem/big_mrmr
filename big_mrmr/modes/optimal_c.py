@@ -8,7 +8,7 @@ from joblib import Parallel, delayed
 import pandas as pd
 from tqdm import tqdm
 
-from modes.abstract_mode import AbstractMode
+from big_mrmr.modes.abstract_mode import AbstractMode
 
 class OptimalC(AbstractMode):    
     def __init__(self, df, replace_na, target, k, top_best_solutions, must_included_vars, max_mins, df_count):
