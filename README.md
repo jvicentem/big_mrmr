@@ -65,6 +65,11 @@ When `optimal_k` is True, it depends on the size of the dataframe as well as on 
 
 If you also struggle with performance, consider creating a Spark Session that runs on a cluster.
 
+## Examples
+
+- Optimal C example: https://colab.research.google.com/drive/15Dey-PoGZVc7HY88opIV6aDk5A0RZaRh?usp=sharing
+- Optimal K example: https://colab.research.google.com/drive/1WdJnjooZqgfQZl4jPX1tNvQSv-qCKUfP?usp=sharing
+
 ## Useful links
 
 - What is MRMR: https://eng.uber.com/optimal-feature-discovery-ml/
