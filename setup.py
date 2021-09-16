@@ -24,13 +24,13 @@ setuptools.setup(
     ext_modules=cythonize('./big_mrmr/cython_modules/_expected_mutual_info_fast.pyx'),    
     python_requires='>=3.6',
     install_requires=[
-        'cython==0.28.5',
-        'joblib==0.13.0',
-        'numpy==1.19.2',
-        'pandas==1.1.0',
-        'pyspark>=3.0.1',
-        'scipy==1.5.2',
-        'scikit-learn==0.24.2',
-        'tqdm==4.29.1'
+            'cython==0.29.24',
+            'joblib==1.0.1',
+            'numpy==1.19.5',
+            'pandas==1.1.5',
+            'pyspark>=3.1.2',
+            'scipy==1.4.1',
+            'scikit-learn==0.22.2.post1',
+            'tqdm==4.62.0'
     ]
 )
