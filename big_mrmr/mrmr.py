@@ -1,4 +1,4 @@
-from datetime import datetime
+import logging
 
 from pyspark.sql import functions as f
 from pyspark.sql.window import Window
@@ -46,8 +46,9 @@ class MRMR:
         self.df_count = self.df.count()
 
     def mrmr(self):               
-        print('MRMR calculation starting...')
-        print(datetime.now())
+        logger = logging.getLogger('optimal_k')
+
+        logger.info('MRMR calculation starting...')
         
         if self.optimal_k:
             opt = OptimalK(self.df,                     

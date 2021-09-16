@@ -22,7 +22,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     include_dirs=np.get_include(),    
     ext_modules=cythonize('./big_mrmr/cython_modules/_expected_mutual_info_fast.pyx'),    
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     install_requires=[
             'cython==0.29.24',
             'joblib==1.0.1',

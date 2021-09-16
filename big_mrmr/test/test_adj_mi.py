@@ -1,27 +1,12 @@
-import os
-import sys
 import unittest
 
-import findspark
-os.environ['SPARK_HOME'] = '/home/jose/anaconda3/envs/python36/lib/python3.6/site-packages/pyspark/'
-findspark.init() 
 import numpy as np
 import pandas as pd
 
 from sklearn.metrics.cluster import adjusted_mutual_info_score
 from sklearn.metrics.cluster._supervised import _generalized_average
-from pyspark.sql import functions as f
 from pyspark.sql import SparkSession
 
-sys.path.append('/home/jose/big_mrmr/mrmr')
-
-os.chdir('./mrmr')
-from Cython.Build import cythonize
-os.environ['PYDEVD_WARN_EVALUATION_TIMEOUT'] = '30'
-cythonize('_expected_mutual_info_fast.pyx')
-os.chdir('..')
-
-import pyximport; pyximport.install()
 
 from big_mrmr.mrmr import MRMR
 from big_mrmr.cython_modules._expected_mutual_info_fast import expected_mutual_information
