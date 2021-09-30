@@ -1,5 +1,7 @@
 # Big MRMR
 
+[![Python 3.7](https://img.shields.io/badge/python-3.7-blue.svg)](https://www.python.org/downloads/release/python-360/) [![Open In Collab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/15Dey-PoGZVc7HY88opIV6aDk5A0RZaRh?usp=sharing)
+
 Maximum Relevance Minimum Redundancy for big datasets.
 
 This Python library uses Spark and Cython to speed up the calculations on big datasets.
@@ -67,8 +69,9 @@ If you also struggle with performance, consider creating a Spark Session that ru
 
 ## Examples
 
-- Optimal C example: https://colab.research.google.com/drive/15Dey-PoGZVc7HY88opIV6aDk5A0RZaRh?usp=sharing
-- Optimal K example: https://colab.research.google.com/drive/1WdJnjooZqgfQZl4jPX1tNvQSv-qCKUfP?usp=sharing
+- Optimal C example: [![Open In Collab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/15Dey-PoGZVc7HY88opIV6aDk5A0RZaRh?usp=sharing)
+ 
+- Optimal K example: [![Open In Collab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WdJnjooZqgfQZl4jPX1tNvQSv-qCKUfP?usp=sharing) 
 
 ## Useful links
 
